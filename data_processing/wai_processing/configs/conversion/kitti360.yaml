@@ -1,0 +1,9 @@
+original_root: /home/Netdisk/KITTI_360/KITTI-360
+root: /home/Netdisk/KITTI_360/mat-360
+
+dataset_name: kitti360
+version: 0.1
+overwrite: True
+
+scene_filters:
+  - process_state_not: [conversion, finished]
