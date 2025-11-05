@@ -61,6 +61,8 @@ def _load_poses_and_intrinsics(original_root, scene_name):
     poses = np.reshape(poses[:,1:],[-1,4,4])
     poses_cam0tow = {}
     for frame, pose in zip(frames, poses):
+        if '0002' in scene_name and frame < 4391:
+            continue
         poses_cam0tow[frame] = pose
 
     imutow = np.loadtxt(imutow_path)
@@ -68,6 +70,8 @@ def _load_poses_and_intrinsics(original_root, scene_name):
     imutow = np.reshape(imutow[:,1:],[-1,3,4])
     Tr_imutow= {}
     for frame, pose in zip(imu_frames, imutow):
+        if '0002' in scene_name and frame < 4391:
+            continue
         pose = np.concatenate((pose, np.array([0.,0.,0.,1.]).reshape(1,4)))
         Tr_imutow[frame] = pose
 
