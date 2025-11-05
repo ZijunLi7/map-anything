@@ -153,15 +153,16 @@ def camtoimage(pointsCam, K):
         u = u[0]; v = v[0]; depth = depth[0];
     return u, v, depth
 
-def process_kitti360_scene(cfg, scene_name, TrVeloToPose, TrVeloToCam0, visualize=True):
+def process_kitti360_scene(cfg, scene_name, TrVeloToPose, TrVeloToCam0, visualize=False):
 
     scene_id =scene_name.split("_")[-2]
 
-    scene_outpath = Path(cfg.root) / scene_name
-    scene_outpath.mkdir(parents=True, exist_ok=True)
-    image_dir = scene_outpath / "images"
+    # Create target directories for this subscene
+    target_scene_root = Path(cfg.root) / scene_name
+    target_scene_root.mkdir(parents=True, exist_ok=True)
+    image_dir = target_scene_root / "images"
     image_dir.mkdir(parents=True, exist_ok=False)
-    depth_dir = scene_outpath / "depth"
+    depth_dir = target_scene_root / "depth"
     depth_dir.mkdir(parents=True, exist_ok=False)
 
     wai_frames = []
@@ -174,7 +175,8 @@ def process_kitti360_scene(cfg, scene_name, TrVeloToPose, TrVeloToCam0, visualiz
     pt3d_path = Path(cfg.original_root) / "data_3d_raw" / scene_name / "velodyne_points" / "data"
 
     for frame_id in pose_cam0tow.keys():
-        image = image_path / ('%010d.png' % frame_id)
+        image_id = ('%010d.png' % frame_id)
+        image = image_path / image_id
         pt3d = pt3d_path / ('%010d.bin' % frame_id)
 
         pt3d = _load_kitti360_pointcloud(pt3d, frame_id, pose_imutow, TrVeloToPose, TrVeloToCam0)
@@ -191,8 +193,8 @@ def process_kitti360_scene(cfg, scene_name, TrVeloToPose, TrVeloToCam0, visualiz
         depthImage = np.zeros((intrinsics_cam0["height"], intrinsics_cam0["width"], 3))
         mask = np.logical_and(np.logical_and(np.logical_and(u>=0, u<intrinsics_cam0["width"]), v>=0), v<intrinsics_cam0["height"])
         # visualize points within 30 meters
-        # mask = np.logical_and(mask, depth>0)
-        mask = np.logical_and(np.logical_and(mask, depth>0), depth<30)
+        mask = np.logical_and(mask, depth>0)
+        # mask = np.logical_and(np.logical_and(mask, depth>0), depth<30)
         depthMap[v[mask],u[mask]] = depth[mask]
 
         if visualize:
@@ -214,6 +216,57 @@ def process_kitti360_scene(cfg, scene_name, TrVeloToPose, TrVeloToCam0, visualiz
             visualize_path = 'visualizations/projected_depth_seq_%s_cam_%s_frame_%010d.png' % (scene_id, '00', frame_id)
             plt.savefig(visualize_path)
             print('Saved visualization to %s' % visualize_path)
+
+        rel_target_image_path = Path("images") / image_id
+        os.symlink(image, target_scene_root / rel_target_image_path)
+
+        rel_depth_out_path = Path("depth") / (Path(image_id).stem + ".exr")
+        store_data(
+            target_scene_root / rel_depth_out_path,
+            torch.tensor(depthMap),
+            "depth",
+        )
+
+        H, W = depthMap.shape
+        intrinsics = intrinsics_cam0["K"]
+        assert W == intrinsics_cam0["width"] and H == intrinsics_cam0["height"]
+
+        # Store WAI frame metadata
+        wai_frame = {
+            "frame_name": Path(image_id).stem,
+            "image": str(rel_target_image_path),
+            "file_path": str(rel_target_image_path),
+            "depth": str(rel_depth_out_path),
+            "transform_matrix": pose_cam0tow[frame_id].tolist(),
+            "h": H,
+            "w": W,
+            "fl_x": float(intrinsics[0, 0]),
+            "fl_y": float(intrinsics[1, 1]),
+            "cx": float(intrinsics[0, 2]),
+            "cy": float(intrinsics[1, 2]),
+        }
+        wai_frames.append(wai_frame)
+
+    # Construct scene metadata for this subscene
+    scene_meta = {
+        "scene_name": scene_name,
+        "dataset_name": cfg.dataset_name,
+        "version": cfg.version,
+        "shared_intrinsics": False,
+        "camera_model": "PINHOLE",
+        "camera_convention": "opencv",
+        "scale_type": "metric",
+        "scene_modalities": {},
+        "frames": wai_frames,
+        "frame_modalities": {
+            "image": {"frame_key": "image", "format": "image"},
+            "depth": {
+                "frame_key": "depth",
+                "format": "depth",
+            },
+        },
+    }
+    store_data(target_scene_root / "scene_meta.json", scene_meta, "scene_meta")
 
 def get_original_kitti360_names(cfg):
     # Get all scene names to process
