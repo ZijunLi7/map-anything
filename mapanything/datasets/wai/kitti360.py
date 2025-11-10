@@ -7,12 +7,11 @@ from mapanything.datasets.base.base_dataset import BaseDataset
 from mapanything.utils.wai.core import load_data, load_frame
 
 class Kitti360WAI(BaseDataset):
-    def __init(
+    def __init__(
         self,
         *args,
         ROOT,
         dataset_metadata_dir,
-        split,
         overfit_num_sets=None,
         sample_specific_scene: bool = False,
         specific_scene_name: str = None,
@@ -22,10 +21,10 @@ class Kitti360WAI(BaseDataset):
         super().__init__(*args, **kwargs)
         self.ROOT = ROOT
         self.dataset_metadata_dir = dataset_metadata_dir
-        self.split = split
         self.overfit_num_sets = overfit_num_sets
         self.sample_specific_scene = sample_specific_scene
         self.specific_scene_name = specific_scene_name
+        self.split = "test"
         self._load_data()
 
         # Define the dataset type flags

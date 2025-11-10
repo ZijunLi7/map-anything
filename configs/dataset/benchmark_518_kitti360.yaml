@@ -11,4 +11,4 @@ resolution_test_kitti360: ${dataset.resolution_options.518_1_33_ar}
 # Sample 10 multi-view sets from each scene
 # Kitti360: 10 scenes
 test_dataset:
-  " + 100 @ ${dataset.kitti360_wai.test.dataset_str}"
+  "+ 100 @ ${dataset.kitti360_wai.test.dataset_str}"

@@ -23,6 +23,7 @@ from mapanything.datasets.wai.scannetpp import ScanNetPPWAI  # noqa
 from mapanything.datasets.wai.spring import SpringWAI  # noqa
 from mapanything.datasets.wai.tav2_wb import TartanAirV2WBWAI  # noqa
 from mapanything.datasets.wai.unrealstereo4k import UnrealStereo4KWAI  # noqa
+from mapanything.datasets.wai.kitti360 import Kitti360WAI  # noqa
 from mapanything.utils.train_tools import get_rank, get_world_size
 
 
