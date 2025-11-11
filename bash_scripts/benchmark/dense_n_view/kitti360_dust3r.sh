@@ -9,7 +9,7 @@ export HYDRA_FULL_ERROR=1
 
 # Define the batch sizes and number of views to loop over
 batch_sizes_and_views=(
-    "1 5 benchmark_512_kitti360"
+    "1 5 kitti360_benchmark_224"
 )
 
 # Loop through each combination
@@ -26,9 +26,9 @@ for combo in "${batch_sizes_and_views[@]}"; do
         dataset.num_workers=12 \
         dataset.num_views=$num_views \
         batch_size=$batch_size \
-        model=mast3r \
+        model=dust3r224 \
         amp=0 \
-        hydra.run.dir='${root_experiments_dir}/mapanything/benchmarking/dense_'"${num_views}"'_view/mast3r'
+        hydra.run.dir='${root_experiments_dir}/map-anything/benchmarking/dense_'"${num_views}"'_view/dust3r'
 
     echo "Finished running $dataset with batch_size=$batch_size and num_views=$num_views"
 done

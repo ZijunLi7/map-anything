@@ -9,7 +9,7 @@ export HYDRA_FULL_ERROR=1
 
 # Define the batch sizes and number of views to loop over
 batch_sizes_and_views=(
-    "2 5 benchmark_224_kitti360"
+    "1 5 kitti360_benchmark_512"
 )
 
 # Loop through each combination
@@ -26,11 +26,9 @@ for combo in "${batch_sizes_and_views[@]}"; do
         dataset.num_workers=12 \
         dataset.num_views=$num_views \
         batch_size=$batch_size \
-        model=mapanything \
-        model/task=images_only \
-        model.encoder.uses_torch_hub=false \
-        model.pretrained='${root_experiments_dir}/map-anything/checkpoints/facebook_map-anything.pth' \
-        hydra.run.dir='${root_experiments_dir}/map-anything/benchmarking/dense_'"${num_views}"'_view/mapa_24v_kitti360'
+        model=mast3r \
+        amp=0 \
+        hydra.run.dir='${root_experiments_dir}/map-anything/benchmarking/dense_'"${num_views}"'_view/mast3r'
 
     echo "Finished running $dataset with batch_size=$batch_size and num_views=$num_views"
 done
