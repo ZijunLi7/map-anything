@@ -139,12 +139,12 @@ def get_parser():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-rd", "--root_dir", default="/fsx/xrtech/data/kitti360", type=str
+        "-rd", "--root_dir", default="/home/Netdisk/KITTI_360/mat-360", type=str
     )
     parser.add_argument(
         "-dmd",
         "--dataset_metadata_dir",
-        default="/fsx/nkeetha/mapanything_dataset_metadata",
+        default="/home/ybc/projects/map-anything/mapanything_dataset_metadata",
         type=str,
     )
     parser.add_argument(
