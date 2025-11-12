@@ -174,3 +174,5 @@ cython_debug/
 # VSCode
 .vscode
 benchmarking/dense_5_view/
+benchmarking/dense_2_view/
+configs/machine/aws.yaml
